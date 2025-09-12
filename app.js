@@ -16,7 +16,7 @@
   // URL Web App Google Sheets untuk menyimpan data
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbV1atTo6IsVdJRmUIsRT5QnLds8TF-epxV7geR6Slo57c5HQ5z8lof3ZeEKbyr2FL/exec';
   // URL Web App Google Sheets untuk mengirim email (Anda harus membuatnya)
-  const SCRIPT_URL_EMAIL = 'GANTI_DENGAN_URL_SCRIPT_EMAIL_ANDA';
+  const SCRIPT_URL_EMAIL = 'https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec';
 
   let chart;
 
