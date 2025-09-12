@@ -5,14 +5,13 @@
   const btnSubmit = document.getElementById('btnSubmit');
   const btnSendToSheet = document.getElementById('btnSendToSheet');
 
-  // Ganti dengan URL Web App Google Apps Script Anda
+  // PASTE URL WEB APP ANDA DI SINI
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxw06ITHAYWQo20w0YFSEnGxWZi1IHiiQ1Gp8vgPiYsJ8e5XleX-4JPj0ZAJQEC19cqwg/exec';
 
   let chart;
 
   function countScores() {
     const counts = { Rationalizing: 0, Asserting: 0, Negotiating: 0, Inspiring: 0, Bridging: 0 };
-    // Logika ini tidak lagi digunakan, tetapi tetap ada untuk fungsi "Lihat Hasil"
     const groups = {
       Rationalizing: [1, 2, 3],
       Asserting: [4, 5, 6],
@@ -95,13 +94,11 @@
       fullName: fullName
     };
 
-    // Kumpulkan status setiap pertanyaan (1 atau 0)
     for (let i = 1; i <= 15; i++) {
       const qId = `q${i}`;
       dataToSend[qId] = document.getElementById(qId).checked ? 1 : 0;
     }
 
-    // Fungsi untuk mengirim data menggunakan formulir tersembunyi
     function sendData(url, data) {
       const form = document.createElement('form');
       form.method = 'POST';
