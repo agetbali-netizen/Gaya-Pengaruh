@@ -13,8 +13,7 @@
   const btnSubmit = document.getElementById('btnSubmit');
   const btnSendToSheet = document.getElementById('btnSendToSheet');
 
-  // URL Web App Google Sheets Anda.
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbV1atTo6IsVdJRmUIsRT5QnLds8TF-epxV7geR6Slo57c5HQ5z8lof3ZeEKbyr2FL/exec';
+  // URL Web App Google Sheets untuk mengirim email
   const SCRIPT_URL_EMAIL = 'GANTI_DENGAN_URL_SCRIPT_EMAIL_ANDA'; // Pastikan Anda menggunakan URL yang benar
 
   let chart;
@@ -126,13 +125,10 @@
       document.body.removeChild(form);
     }
 
-    // Kirim data ke Google Sheets
-    sendData(SCRIPT_URL, dataToSend);
-
-    // Kirim data sebagai email
+    // Hanya kirim data sebagai email
     sendData(SCRIPT_URL_EMAIL, dataToSend);
 
-    alert('Data Anda telah berhasil dikirim! Silakan periksa tab baru.');
+    alert('Hasil Anda telah berhasil dikirim melalui email!');
     btnSendToSheet.disabled = false;
   });
 
