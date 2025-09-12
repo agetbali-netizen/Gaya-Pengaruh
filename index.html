@@ -68,7 +68,7 @@
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                                 placeholder="Masukkan email Anda" required>
                 </div>
-                
+
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Petunjuk Pengisian</h3>
                 <div class="space-y-3 text-gray-600">
                     <p>• Bacalah setiap pernyataan dengan cermat</p>
@@ -240,7 +240,7 @@
         let currentQuestion = 0;
         let answers = { rationalizing: 0, asserting: 0, negotiating: 0, inspiring: 0, bridging: 0 };
         let selectedAnswer = null;
-        
+
         const styles = {
             rationalizing: {
                 title: "Rationalizing (Rasionalisasi)",
@@ -276,8 +276,9 @@
 
         function startAssessment() {
             const fullName = document.getElementById('fullName').value.trim();
-            if (!fullName) {
-                alert('Silakan masukkan nama lengkap Anda terlebih dahulu.');
+            const email = document.getElementById('email').value.trim();
+            if (!fullName || !email) {
+                alert('Silakan masukkan nama lengkap dan email Anda terlebih dahulu.');
                 return;
             }
             document.getElementById('instructions').classList.add('hidden');
@@ -397,11 +398,61 @@
             recList.innerHTML = result.recommendations.map(rec => `<li>${rec}</li>`).join('');
         }
 
+        function sendResultsToEmail() {
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            if (!fullName || !email) {
+                alert('Nama lengkap dan email diperlukan untuk mengirim hasil.');
+                return;
+            }
+            
+            const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
+            const result = styles[dominantStyle];
+            const timestamp = new Date().toLocaleString('id-ID');
+
+            const data = {
+                action: 'sendEmailText',
+                nama: fullName,
+                email: email,
+                dominantStyle: result.title,
+                description: result.description,
+                recommendations: result.recommendations.join('\n'),
+                scores: Object.keys(answers).map(key => `${key}: ${answers[key]}`).join('\n'),
+                timestamp: timestamp
+            };
+            
+            const button = document.querySelector('button[onclick="sendResultsToEmail()"]');
+            button.disabled = true;
+            button.textContent = 'Mengirim...';
+
+            fetch('https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.error) {
+                    alert('Gagal mengirim email: ' + result.error);
+                    console.error('Apps Script Error:', result.error);
+                } else {
+                    alert('Hasil asesmen berhasil dikirim ke email!');
+                }
+            })
+            .catch(error => {
+                alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+                console.error('Fetch Error:', error);
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = 'Kirim Hasil ke Email';
+            });
+        }
+
         function downloadResultsAsPDF() {
             const resultsElement = document.getElementById('results');
             const fullName = document.getElementById('fullName').value.trim();
             const fileName = `Hasil_Asesmen_Gaya_Mempengaruhi_${fullName.replace(/ /g, '_')}.pdf`;
-
             const options = {
                 margin: 10,
                 filename: fileName,
@@ -409,7 +460,6 @@
                 html2canvas: { scale: 2 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-
             html2pdf().from(resultsElement).set(options).save();
         }
 
@@ -417,10 +467,8 @@
             currentQuestion = 0;
             answers = { rationalizing: 0, asserting: 0, negotiating: 0, inspiring: 0, bridging: 0 };
             selectedAnswer = null;
-
             document.getElementById('results').classList.add('hidden');
             document.getElementById('instructions').classList.remove('hidden');
-
             document.getElementById('progress-bar').style.width = '0%';
             document.getElementById('progress-text').textContent = '0/20';
         }
