@@ -1,25 +1,25 @@
 (() => {
-  const groups = {
-    Rationalizing: [1, 2, 3],
-    Asserting: [4, 5, 6],
-    Negotiating: [7, 8, 9],
-    Inspiring: [10, 11, 12],
-    Bridging: [13, 14, 15]
-  };
-
   const form = document.getElementById('formGM');
   const result = document.getElementById('result');
   const btnReset = document.getElementById('btnReset');
   const btnSubmit = document.getElementById('btnSubmit');
   const btnSendToSheet = document.getElementById('btnSendToSheet');
 
-  // URL Web App Google Apps Script
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxw06ITHAYWQo20w0YFSEnGxWZi1IHiiQ1Gp8vgPiYsJ8e5XleX-4JPj0ZAJQEC19cqwg/exec';
+  // Ganti dengan URL Web App Google Apps Script Anda
+  const SCRIPT_URL = 'GANTI_DENGAN_URL_WEB_APP_ANDA';
 
   let chart;
 
   function countScores() {
     const counts = { Rationalizing: 0, Asserting: 0, Negotiating: 0, Inspiring: 0, Bridging: 0 };
+    // Logika ini tidak lagi digunakan, tetapi tetap ada untuk fungsi "Lihat Hasil"
+    const groups = {
+      Rationalizing: [1, 2, 3],
+      Asserting: [4, 5, 6],
+      Negotiating: [7, 8, 9],
+      Inspiring: [10, 11, 12],
+      Bridging: [13, 14, 15]
+    };
     for (const [label, nums] of Object.entries(groups)) {
       counts[label] = nums.reduce((acc, n) => acc + (document.getElementById(`q${n}`).checked ? 1 : 0), 0);
     }
@@ -89,25 +89,24 @@
 
   btnSendToSheet.addEventListener('click', () => {
     btnSendToSheet.disabled = true;
-
-    const counts = countScores();
+    
     const fullName = document.getElementById('fullName').value;
-
     const dataToSend = {
-      fullName: fullName,
-      Rationalizing: counts.Rationalizing,
-      Asserting: counts.Asserting,
-      Negotiating: counts.Negotiating,
-      Inspiring: counts.Inspiring,
-      Bridging: counts.Bridging
+      fullName: fullName
     };
+
+    // Kumpulkan status setiap pertanyaan (1 atau 0)
+    for (let i = 1; i <= 15; i++) {
+      const qId = `q${i}`;
+      dataToSend[qId] = document.getElementById(qId).checked ? 1 : 0;
+    }
 
     // Fungsi untuk mengirim data menggunakan formulir tersembunyi
     function sendData(url, data) {
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = url;
-      form.target = '_blank'; // Buka di tab baru agar halaman tidak dimuat ulang
+      form.target = '_blank';
       form.style.display = 'none';
 
       for (const key in data) {
