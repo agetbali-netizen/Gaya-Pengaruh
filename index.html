@@ -27,6 +27,18 @@
                 display: none;
             }
         }
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -196,7 +208,7 @@
                 </div>
 
                 <div class="text-center mt-6 no-print">
-                    <button onclick="sendResultsToEmail()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mr-4">
+                    <button id="email-button" onclick="sendResultsToEmail()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mr-4">
                         Kirim Hasil ke Email
                     </button>
                     <button onclick="downloadResultsAsPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mr-4">
@@ -206,6 +218,9 @@
                         Ulangi Asesmen
                     </button>
                 </div>
+                
+                <!-- Status message untuk feedback pengiriman email -->
+                <div id="email-status" class="mt-4 text-center hidden"></div>
             </div>
         </div>
     </div>
@@ -245,7 +260,7 @@
             rationalizing: {
                 title: "Rationalizing (Rasionalisasi)",
                 icon: "📊",
-                description: "Anda cenderung mempengaruhi orang lain dengan menggunakan data, fakta, dan argumen logis. Anda percaya pada kekuatan analisis dan bukti empiris untuk meyakinkan orang lain.",
+                description: "Anda cenderung mempengaruhi orang lain dengan menggunakan data, fakta dan argumen logis. Anda percaya pada kekuatan analisis dan bukti empiris untuk meyakinkan orang lain.",
                 recommendations: ["• Kembangkan kemampuan storytelling untuk melengkapi data", "• Latih empati untuk memahami perspektif emosional", "• Pelajari cara menyederhanakan informasi kompleks"]
             },
             asserting: {
@@ -406,6 +421,13 @@
                 return;
             }
             
+            // Validasi format email
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                alert('Format email tidak valid. Silakan periksa kembali.');
+                return;
+            }
+            
             const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
             const result = styles[dominantStyle];
             const timestamp = new Date().toLocaleString('id-ID');
@@ -421,32 +443,82 @@
                 timestamp: timestamp
             };
             
-            const button = document.querySelector('button[onclick="sendResultsToEmail()"]');
+            const button = document.getElementById('email-button');
+            const statusElement = document.getElementById('email-status');
+            
             button.disabled = true;
-            button.textContent = 'Mengirim...';
-
-            fetch('https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.error) {
-                    alert('Gagal mengirim email: ' + result.error);
-                    console.error('Apps Script Error:', result.error);
-                } else {
+            button.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
+            statusElement.classList.add('hidden');
+            
+            // Menggunakan pendekatan form submission untuk menghindari CORS
+            const form = document.createElement('form');
+            form.action = 'https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec';
+            form.method = 'POST';
+            
+            // Tambahkan semua data sebagai input tersembunyi
+            for (const key in data) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = data[key];
+                form.appendChild(input);
+            }
+            
+            document.body.appendChild(form);
+            
+            // Buat iframe untuk menangani response
+            const iframe = document.createElement('iframe');
+            iframe.name = 'email-iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            form.target = 'email-iframe';
+            
+            // Handler untuk iframe load
+            iframe.onload = function() {
+                try {
+                    // Coba baca response dari iframe
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const responseText = iframeDoc.body.textContent || iframeDoc.body.innerText;
+                    
+                    let response;
+                    try {
+                        response = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error('Gagal parsing response:', e);
+                        throw new Error('Format response tidak valid');
+                    }
+                    
+                    if (response.error) {
+                        throw new Error(response.error);
+                    }
+                    
+                    // Berhasil
+                    statusElement.textContent = '✅ Hasil asesmen berhasil dikirim ke email!';
+                    statusElement.classList.remove('hidden', 'text-red-600');
+                    statusElement.classList.add('text-green-600');
+                    
                     alert('Hasil asesmen berhasil dikirim ke email!');
+                } catch (error) {
+                    console.error('Error:', error);
+                    statusElement.textContent = '❌ Gagal mengirim email: ' + error.message;
+                    statusElement.classList.remove('hidden', 'text-green-600');
+                    statusElement.classList.add('text-red-600');
+                    
+                    alert('Gagal mengirim email: ' + error.message);
+                } finally {
+                    // Reset button
+                    button.disabled = false;
+                    button.textContent = 'Kirim Hasil ke Email';
+                    
+                    // Bersihkan
+                    document.body.removeChild(form);
+                    document.body.removeChild(iframe);
                 }
-            })
-            .catch(error => {
-                alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
-                console.error('Fetch Error:', error);
-            })
-            .finally(() => {
-                button.disabled = false;
-                button.textContent = 'Kirim Hasil ke Email';
-            });
+            };
+            
+            // Kirim form
+            form.submit();
         }
 
         function downloadResultsAsPDF() {
@@ -471,6 +543,7 @@
             document.getElementById('instructions').classList.remove('hidden');
             document.getElementById('progress-bar').style.width = '0%';
             document.getElementById('progress-text').textContent = '0/20';
+            document.getElementById('email-status').classList.add('hidden');
         }
     </script>
 </body>
