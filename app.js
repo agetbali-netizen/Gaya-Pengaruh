@@ -1,4 +1,14 @@
-(() => {
+// Fungsi untuk menghitung skor berdasarkan checkbox yang dicentang
+function countScores() {
+  const counts = {
+    Rationalizing: 0,
+    Asserting: 0,
+    Negotiating: 0,
+    Inspiring: 0,
+    Bridging: 0
+  };
+
+  // Pemetaan checkbox untuk setiap kategori
   const groups = {
     Rationalizing: [1, 2, 3],
     Asserting: [4, 5, 6],
@@ -7,111 +17,15 @@
     Bridging: [13, 14, 15]
   };
 
-  const form = document.getElementById('formGM');
-  const result = document.getElementById('result');
-  const btnReset = document.getElementById('btnReset');
-  const downloadLink = document.getElementById('downloadPng');
-  const btnExportPdf = document.getElementById('exportPdf');
-
-  let chart;
-
-  function countScores() {
-    const counts = { Rationalizing: 0, Asserting: 0, Negotiating: 0, Inspiring: 0, Bridging: 0 };
-    for (const [label, nums] of Object.entries(groups)) {
-      counts[label] = nums.reduce((acc, n) => acc + (document.getElementById(`q${n}`).checked ? 1 : 0), 0);
-    }
-    return counts;
+  // Menghitung jumlah centangan untuk setiap kategori
+  for (const [category, questions] of Object.entries(groups)) {
+    counts[category] = questions.reduce((acc, q) => acc + (document.getElementById(`q${q}`).checked ? 1 : 0), 0);
   }
 
-  function updateCounters(counts) {
-    document.getElementById('sRationalizing').textContent = counts.Rationalizing;
-    document.getElementById('sAsserting').textContent = counts.Asserting;
-    document.getElementById('sNegotiating').textContent = counts.Negotiating;
-    document.getElementById('sInspiring').textContent = counts.Inspiring;
-    document.getElementById('sBridging').textContent = counts.Bridging;
-  }
+  return counts;
+}
 
-  function renderChart(counts) {
-    const ctx = document.getElementById('radarChart').getContext('2d');
-    const data = [
-      counts.Rationalizing, counts.Asserting, counts.Negotiating, counts.Inspiring, counts.Bridging
-    ];
-
-    if (chart) chart.destroy();
-    chart = new Chart(ctx, {
-      type: 'radar',
-      data: {
-        labels: ['Rationalizing', 'Asserting', 'Negotiating', 'Inspiring', 'Bridging'],
-        datasets: [{
-          label: 'Gaya Mempengaruhi',
-          data,
-          fill: true,
-          backgroundColor: 'rgba(0, 123, 255, 0.2)', 
-          borderColor: 'rgba(0, 123, 255, 1)', 
-          pointBackgroundColor: 'rgba(0, 123, 255, 1)', 
-          pointBorderColor: '#fff'
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: { 
-          r: { 
-            min: 0, 
-            max: 3, 
-            ticks: { stepSize: 1 },
-            grid: {
-              color: "#ddd" 
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            display: false 
-          }
-        }
-      }
-    });
-
-    setTimeout(() => {
-      downloadLink.href = chart.toBase64Image();
-    }, 300);
-  }
-
-  function exportToPDF(counts) {
-    const fullName = document.getElementById('fullName').value; // Get the full name
-    const doc = new jsPDF();
-    doc.text('Hasil Gaya Mempengaruhi', 20, 10);
-    doc.text(`Nama Lengkap: ${fullName}`, 20, 20); // Add full name to the PDF
-    doc.text(`Rationalizing: ${counts.Rationalizing}`, 20, 30);
-    doc.text(`Asserting: ${counts.Asserting}`, 20, 40);
-    doc.text(`Negotiating: ${counts.Negotiating}`, 20, 50);
-    doc.text(`Inspiring: ${counts.Inspiring}`, 20, 60);
-    doc.text(`Bridging: ${counts.Bridging}`, 20, 70);
-    doc.addImage(chart.toBase64Image(), 'PNG', 20, 80, 170, 120);
-    doc.save('hasil-gaya-mempengaruhi.pdf');
-  }
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const counts = countScores();
-    updateCounters(counts);
-    renderChart(counts);
-    result.classList.remove('hidden');
-    result.scrollIntoView({ behavior: 'smooth' });
-  });
-
-  btnReset.addEventListener('click', () => {
-    form.reset();
-    if (chart) chart.destroy();
-    result.classList.add('hidden');
-  });
-
-  btnExportPdf.addEventListener('click', () => {
-    const counts = countScores();
-    exportToPDF(counts); 
-  });
-})();
-// Kirim hasil scoring ke Google Sheets
+// Fungsi untuk mengirim data ke Google Sheets
 async function sendToGoogleSheets(fullName, counts) {
   const response = await fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
     method: 'POST',
@@ -120,11 +34,44 @@ async function sendToGoogleSheets(fullName, counts) {
     },
     body: JSON.stringify({
       fullName: fullName,  // Nama lengkap
-      counts: counts       // Skor dari form
+      counts: counts       // Skor per kategori
     }),
   });
 
   if (!response.ok) {
     alert('Gagal mengirim data ke Google Sheets');
+  } else {
+    alert('Data berhasil dikirim!');
   }
 }
+
+// Menambahkan event listener untuk menangani submit form
+const form = document.getElementById('formGM');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();  // Menghentikan form dari submit default
+
+  // Ambil nama lengkap dari input field
+  const fullName = document.getElementById('fullName').value;
+
+  // Hitung skor berdasarkan checkbox yang dicentang
+  const counts = countScores();
+
+  // Kirimkan data ke Google Sheets
+  sendToGoogleSheets(fullName, counts);
+
+  // Tampilkan hasil atau grafik sesuai dengan hasil perhitungan
+  updateCounters(counts);  // Fungsi ini untuk memperbarui skor yang ditampilkan
+  renderChart(counts);     // Fungsi ini untuk menggambar grafik radar
+
+  // Tampilkan hasil
+  result.classList.remove('hidden');
+  result.scrollIntoView({ behavior: 'smooth' });
+});
+
+// Fungsi untuk reset form dan hasil
+const btnReset = document.getElementById('btnReset');
+btnReset.addEventListener('click', () => {
+  form.reset();  // Reset form
+  if (chart) chart.destroy();  // Hapus grafik jika ada
+  result.classList.add('hidden');  // Sembunyikan hasil
+});
