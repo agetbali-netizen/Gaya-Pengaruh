@@ -80,7 +80,7 @@
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    btnSubmit.disabled = true; // Nonaktifkan tombol untuk mencegah pengiriman ganda
+    btnSubmit.disabled = true; // Nonaktifkan tombol
 
     const counts = countScores();
     const fullName = document.getElementById('fullName').value;
@@ -116,7 +116,7 @@
     } catch (error) {
       console.error('Error saat mengirim data:', error);
     } finally {
-      btnSubmit.disabled = false; // Aktifkan kembali tombol setelah proses selesai
+      btnSubmit.disabled = false; // Aktifkan kembali tombol
     }
   });
 
