@@ -430,16 +430,32 @@
             
             const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
             const result = styles[dominantStyle];
-            const timestamp = new Date().toLocaleString('id-ID');
+            const timestamp = new Date().toLocaleString('id-ID', {
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
 
+            // Format data dengan benar untuk dikirim ke Google Apps Script
             const data = {
                 action: 'sendEmailText',
                 nama: fullName,
                 email: email,
+                from: 'agetbali@gmail.com', // Menambahkan pengirim
+                subject: 'Hasil Asesmen Gaya Mempengaruhi - ' + fullName,
                 dominantStyle: result.title,
                 description: result.description,
                 recommendations: result.recommendations.join('\n'),
-                scores: Object.keys(answers).map(key => `${key}: ${answers[key]}`).join('\n'),
+                scores: JSON.stringify({
+                    rationalizing: answers.rationalizing,
+                    asserting: answers.asserting,
+                    negotiating: answers.negotiating,
+                    inspiring: answers.inspiring,
+                    bridging: answers.bridging
+                }),
                 timestamp: timestamp
             };
             
@@ -450,75 +466,45 @@
             button.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
             statusElement.classList.add('hidden');
             
-            // Menggunakan pendekatan form submission untuk menghindari CORS
-            const form = document.createElement('form');
-            form.action = 'https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec';
-            form.method = 'POST';
-            
-            // Tambahkan semua data sebagai input tersembunyi
-            for (const key in data) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = data[key];
-                form.appendChild(input);
-            }
-            
-            document.body.appendChild(form);
-            
-            // Buat iframe untuk menangani response
-            const iframe = document.createElement('iframe');
-            iframe.name = 'email-iframe';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-            
-            form.target = 'email-iframe';
-            
-            // Handler untuk iframe load
-            iframe.onload = function() {
-                try {
-                    // Coba baca response dari iframe
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    const responseText = iframeDoc.body.textContent || iframeDoc.body.innerText;
-                    
-                    let response;
-                    try {
-                        response = JSON.parse(responseText);
-                    } catch (e) {
-                        console.error('Gagal parsing response:', e);
-                        throw new Error('Format response tidak valid');
-                    }
-                    
-                    if (response.error) {
-                        throw new Error(response.error);
-                    }
-                    
-                    // Berhasil
-                    statusElement.textContent = '✅ Hasil asesmen berhasil dikirim ke email!';
-                    statusElement.classList.remove('hidden', 'text-red-600');
-                    statusElement.classList.add('text-green-600');
-                    
-                    alert('Hasil asesmen berhasil dikirim ke email!');
-                } catch (error) {
-                    console.error('Error:', error);
-                    statusElement.textContent = '❌ Gagal mengirim email: ' + error.message;
-                    statusElement.classList.remove('hidden', 'text-green-600');
-                    statusElement.classList.add('text-red-600');
-                    
-                    alert('Gagal mengirim email: ' + error.message);
-                } finally {
-                    // Reset button
-                    button.disabled = false;
-                    button.textContent = 'Kirim Hasil ke Email';
-                    
-                    // Bersihkan
-                    document.body.removeChild(form);
-                    document.body.removeChild(iframe);
+            // Menggunakan pendekatan fetch dengan error handling yang lebih baik
+            fetch('https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-            };
-            
-            // Kirim form
-            form.submit();
+                return response.json();
+            })
+            .then(result => {
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                // Berhasil
+                statusElement.textContent = '✅ Hasil asesmen berhasil dikirim ke email!';
+                statusElement.classList.remove('hidden', 'text-red-600');
+                statusElement.classList.add('text-green-600');
+                
+                alert('Hasil asesmen berhasil dikirim ke email!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusElement.textContent = '❌ Gagal mengirim email: ' + error.message;
+                statusElement.classList.remove('hidden', 'text-green-600');
+                statusElement.classList.add('text-red-600');
+                
+                alert('Gagal mengirim email: ' + error.message);
+            })
+            .finally(() => {
+                // Reset button
+                button.disabled = false;
+                button.textContent = 'Kirim Hasil ke Email';
+            });
         }
 
         function downloadResultsAsPDF() {
