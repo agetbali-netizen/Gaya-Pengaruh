@@ -190,7 +190,7 @@
                 </div>
 
                 <div class="text-center mt-6 no-print">
-                    <button onclick="sendResultsToEmailPrompt()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mr-4">
+                    <button onclick="sendResultsToEmail()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mr-4">
                         Kirim Hasil ke Email
                     </button>
                     <button onclick="downloadResultsAsPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mr-4">
@@ -270,8 +270,9 @@
 
         function startAssessment() {
             const fullName = document.getElementById('fullName').value.trim();
-            if (!fullName) {
-                alert('Silakan masukkan nama lengkap Anda terlebih dahulu.');
+            const email = document.getElementById('email').value.trim();
+            if (!fullName || !email) {
+                alert('Silakan masukkan nama lengkap dan email Anda terlebih dahulu.');
                 return;
             }
             document.getElementById('instructions').classList.add('hidden');
@@ -315,7 +316,7 @@
                     answers[questions[currentQuestion].type]++;
                 }
                 selectedAnswer = null;
-
+                
                 if (currentQuestion < questions.length - 1) {
                     currentQuestion++;
                     showQuestion();
@@ -391,19 +392,14 @@
             recList.innerHTML = result.recommendations.map(rec => `<li>${rec}</li>`).join('');
         }
 
-        function sendResultsToEmailPrompt() {
+        function sendResultsToEmail() {
             const fullName = document.getElementById('fullName').value.trim();
-            if (!fullName) {
-                alert('Nama lengkap diperlukan untuk mengirim hasil.');
+            const email = document.getElementById('email').value.trim();
+            if (!fullName || !email) {
+                alert('Nama lengkap dan email diperlukan untuk mengirim hasil.');
                 return;
             }
             
-            const userEmail = prompt("Silakan masukkan alamat email untuk mengirim hasil:");
-            if (!userEmail) {
-                alert("Pengiriman dibatalkan. Alamat email tidak valid.");
-                return;
-            }
-
             const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
             const result = styles[dominantStyle];
             const timestamp = new Date().toLocaleString('id-ID');
@@ -411,7 +407,7 @@
             const data = {
                 action: 'sendEmailText',
                 nama: fullName,
-                email: userEmail,
+                email: email,
                 dominantStyle: result.title,
                 description: result.description,
                 recommendations: result.recommendations.join('\n'),
@@ -419,16 +415,22 @@
                 timestamp: timestamp
             };
             
-            const button = document.querySelector('button[onclick="sendResultsToEmailPrompt()"]');
+            const button = document.querySelector('button[onclick="sendResultsToEmail()"]');
             button.disabled = true;
             button.textContent = 'Mengirim...';
-            
+
             fetch('https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Apps Script returned an error.');
+                }
+            })
             .then(result => {
                 if (result.error) {
                     alert('Gagal mengirim email: ' + result.error);
