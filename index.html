@@ -399,56 +399,53 @@
         }
 
         function sendResultsToEmail() {
-            const fullName = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            if (!fullName || !email) {
-                alert('Nama lengkap dan email diperlukan untuk mengirim hasil.');
-                return;
-            }
-            
-            const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
-            const result = styles[dominantStyle];
-            const timestamp = new Date().toLocaleString('id-ID');
-
-            const data = {
-                action: 'sendEmailText',
-                nama: fullName,
-                email: email,
-                dominantStyle: result.title,
-                description: result.description,
-                recommendations: result.recommendations.join('\n'),
-                scores: Object.keys(answers).map(key => `${key}: ${answers[key]}`).join('\n'),
-                timestamp: timestamp
-            };
-            
-            const button = document.querySelector('button[onclick="sendResultsToEmail()"]');
-            button.disabled = true;
-            button.textContent = 'Mengirim...';
-
-            fetch('https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.error) {
-                    alert('Gagal mengirim email: ' + result.error);
-                    console.error('Apps Script Error:', result.error);
-                } else {
-                    alert('Hasil asesmen berhasil dikirim ke email!');
-                }
-            })
-            .catch(error => {
-                alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
-                console.error('Fetch Error:', error);
-            })
-            .finally(() => {
-                button.disabled = false;
-                button.textContent = 'Kirim Hasil ke Email';
-            });
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        if (!fullName || !email) {
+            alert('Nama lengkap dan email diperlukan untuk mengirim hasil.');
+            return;
         }
 
+        const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
+        const result = styles[dominantStyle];
+        const timestamp = new Date().toLocaleString('id-ID');
+
+        const data = {
+            action: 'sendEmailText',
+            nama: fullName,
+            email: email,
+            dominantStyle: result.title,
+            description: result.description,
+            recommendations: result.recommendations.join('\n'),
+            scores: Object.keys(answers).map(key => `${key}: ${answers[key]}`).join('\n'),
+            timestamp: timestamp
+        };
+
+        const button = document.querySelector('button[onclick="sendResultsToEmail()"]');
+        button.disabled = true;
+        button.textContent = 'Mengirim...';
+
+        // URL Apps Script Anda
+        const appScriptUrl = 'https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec';
+
+        fetch(appScriptUrl, {
+            method: 'POST',
+            mode: 'no-cors', // Penting untuk menghindari CORS issue, tapi membuat response tidak bisa di-baca
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(() => {
+            alert('Hasil asesmen berhasil dikirim ke email!');
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.textContent = 'Kirim Hasil ke Email';
+        });
+    }
         function downloadResultsAsPDF() {
             const resultsElement = document.getElementById('results');
             const fullName = document.getElementById('fullName').value.trim();
