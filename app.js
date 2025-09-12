@@ -111,3 +111,20 @@
     exportToPDF(counts); 
   });
 })();
+// Kirim hasil scoring ke Google Sheets
+async function sendToGoogleSheets(fullName, counts) {
+  const response = await fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      fullName: fullName,  // Nama lengkap
+      counts: counts       // Skor dari form
+    }),
+  });
+
+  if (!response.ok) {
+    alert('Gagal mengirim data ke Google Sheets');
+  }
+}
