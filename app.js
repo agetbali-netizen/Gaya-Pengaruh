@@ -6,7 +6,7 @@
   const btnSendToSheet = document.getElementById('btnSendToSheet');
 
   // Ganti dengan URL Web App Google Apps Script Anda
-  const SCRIPT_URL = 'GANTI_DENGAN_URL_WEB_APP_ANDA';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxw06ITHAYWQo20w0YFSEnGxWZi1IHiiQ1Gp8vgPiYsJ8e5XleX-4JPj0ZAJQEC19cqwg/exec';
 
   let chart;
 
