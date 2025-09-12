@@ -27,7 +27,7 @@ function countScores() {
 
 // Fungsi untuk mengirim data ke Google Sheets
 async function sendToGoogleSheets(fullName, counts) {
-  const response = await fetch('https://script.google.com/macros/s/AKfycbxehEAd3dOmbtDfR4zrbeEusNqHqRPIB9eCaPsDNpU/exec', {
+  const response = await fetch('https://script.google.com/macros/s/AKfycbzbV1atTo6IsVdJRmUIsRT5QnLds8TF-epxV7geR6Slo57c5HQ5z8lof3ZeEKbyr2FL/exec', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
