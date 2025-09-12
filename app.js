@@ -11,9 +11,9 @@
   const result = document.getElementById('result');
   const btnReset = document.getElementById('btnReset');
   const btnSubmit = document.getElementById('btnSubmit');
+  const btnSendToSheet = document.getElementById('btnSendToSheet');
 
   // URL Web App Google Sheets Anda.
-  // Pastikan URL ini sesuai dengan URL dari deployment skrip Google Anda.
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbV1atTo6IsVdJRmUIsRT5QnLds8TF-epxV7geR6Slo57c5HQ5z8lof3ZeEKbyr2FL/exec';
 
   let chart;
@@ -78,19 +78,21 @@
     });
   }
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
-    btnSubmit.disabled = true; // Nonaktifkan tombol
-
     const counts = countScores();
-    const fullName = document.getElementById('fullName').value;
-
     updateCounters(counts);
     renderChart(counts);
     result.classList.remove('hidden');
     result.scrollIntoView({ behavior: 'smooth' });
+  });
 
-    // Siapkan data untuk dikirim ke Google Sheets
+  btnSendToSheet.addEventListener('click', async () => {
+    btnSendToSheet.disabled = true;
+
+    const counts = countScores();
+    const fullName = document.getElementById('fullName').value;
+
     const dataToSend = {
       fullName: fullName,
       Rationalizing: counts.Rationalizing,
@@ -100,7 +102,6 @@
       Bridging: counts.Bridging
     };
 
-    // Kirim data menggunakan fetch
     try {
       const response = await fetch(SCRIPT_URL, {
         method: 'POST',
@@ -113,10 +114,12 @@
         body: JSON.stringify(dataToSend)
       });
       console.log('Data berhasil dikirim ke Google Sheets.');
+      alert('Data Anda telah berhasil dikirim!');
     } catch (error) {
       console.error('Error saat mengirim data:', error);
+      alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
     } finally {
-      btnSubmit.disabled = false; // Aktifkan kembali tombol
+      btnSendToSheet.disabled = false;
     }
   });
 
