@@ -276,9 +276,8 @@
 
         function startAssessment() {
             const fullName = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            if (!fullName || !email) {
-                alert('Silakan masukkan nama lengkap dan email Anda terlebih dahulu.');
+            if (!fullName) {
+                alert('Silakan masukkan nama lengkap Anda terlebih dahulu.');
                 return;
             }
             document.getElementById('instructions').classList.add('hidden');
@@ -398,58 +397,11 @@
             recList.innerHTML = result.recommendations.map(rec => `<li>${rec}</li>`).join('');
         }
 
-        function sendResultsToEmail() {
-        const fullName = document.getElementById('fullName').value.trim();
-        const email = document.getElementById('email').value.trim();
-        if (!fullName || !email) {
-            alert('Nama lengkap dan email diperlukan untuk mengirim hasil.');
-            return;
-        }
-
-        const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
-        const result = styles[dominantStyle];
-        const timestamp = new Date().toLocaleString('id-ID');
-
-        const data = {
-            action: 'sendEmailText',
-            nama: fullName,
-            email: email,
-            dominantStyle: result.title,
-            description: result.description,
-            recommendations: result.recommendations.join('\n'),
-            scores: Object.keys(answers).map(key => `${key}: ${answers[key]}`).join('\n'),
-            timestamp: timestamp
-        };
-
-        const button = document.querySelector('button[onclick="sendResultsToEmail()"]');
-        button.disabled = true;
-        button.textContent = 'Mengirim...';
-
-        // URL Apps Script Anda
-        const appScriptUrl = 'https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec';
-
-        fetch(appScriptUrl, {
-            method: 'POST',
-            mode: 'no-cors', // Penting untuk menghindari CORS issue, tapi membuat response tidak bisa di-baca
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(() => {
-            alert('Hasil asesmen berhasil dikirim ke email!');
-        })
-        .catch(error => {
-            console.error('Fetch Error:', error);
-            alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
-        })
-        .finally(() => {
-            button.disabled = false;
-            button.textContent = 'Kirim Hasil ke Email';
-        });
-    }
         function downloadResultsAsPDF() {
             const resultsElement = document.getElementById('results');
             const fullName = document.getElementById('fullName').value.trim();
             const fileName = `Hasil_Asesmen_Gaya_Mempengaruhi_${fullName.replace(/ /g, '_')}.pdf`;
+
             const options = {
                 margin: 10,
                 filename: fileName,
@@ -457,6 +409,7 @@
                 html2canvas: { scale: 2 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
+
             html2pdf().from(resultsElement).set(options).save();
         }
 
@@ -464,8 +417,10 @@
             currentQuestion = 0;
             answers = { rationalizing: 0, asserting: 0, negotiating: 0, inspiring: 0, bridging: 0 };
             selectedAnswer = null;
+
             document.getElementById('results').classList.add('hidden');
             document.getElementById('instructions').classList.remove('hidden');
+
             document.getElementById('progress-bar').style.width = '0%';
             document.getElementById('progress-text').textContent = '0/20';
         }
