@@ -6,7 +6,7 @@
   const btnSendToSheet = document.getElementById('btnSendToSheet');
 
   // PASTE URL WEB APP ANDA DI SINI
-  const SCRIPT_URL = 'https://docs.google.com/spreadsheets/d/1iQAb1--YlQjPrn0TtZChManPDA8ONFOwiT_mhiQoJvA/edit?gid=0#gid=0';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxw06ITHAYWQo20w0YFSEnGxWZi1IHiiQ1Gp8vgPiYsJ8e5XleX-4JPj0ZAJQEC19cqwg/exec';
 
   let chart;
 
