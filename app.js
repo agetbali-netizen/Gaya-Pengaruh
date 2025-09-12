@@ -14,7 +14,7 @@
   const btnSendToSheet = document.getElementById('btnSendToSheet');
 
   // URL Web App Google Sheets untuk mengirim email
-  const SCRIPT_URL_EMAIL = 'https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec'; // Pastikan Anda menggunakan URL yang benar
+  const SCRIPT_URL_EMAIL = 'https://script.google.com/macros/s/AKfycbzbV1atTo6IsVdJRmUIsRT5QnLds8TF-epxV7geR6Slo57c5HQ5z8lof3ZeEKbyr2FL/exec'; // Pastikan Anda menggunakan URL yang benar
 
   let chart;
 
