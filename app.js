@@ -13,7 +13,7 @@
   const btnSubmit = document.getElementById('btnSubmit');
   const btnSendToSheet = document.getElementById('btnSendToSheet');
 
-  // Ganti dengan URL Web App Google Apps Script Anda
+  // URL Web App Google Apps Script
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxw06ITHAYWQo20w0YFSEnGxWZi1IHiiQ1Gp8vgPiYsJ8e5XleX-4JPj0ZAJQEC19cqwg/exec';
 
   let chart;
@@ -87,33 +87,48 @@
     result.scrollIntoView({ behavior: 'smooth' });
   });
 
-  btnSendToSheet.addEventListener('click', async () => {
+  btnSendToSheet.addEventListener('click', () => {
     btnSendToSheet.disabled = true;
 
     const counts = countScores();
     const fullName = document.getElementById('fullName').value;
 
-    const formData = new FormData();
-    formData.append('fullName', fullName);
-    formData.append('Rationalizing', counts.Rationalizing);
-    formData.append('Asserting', counts.Asserting);
-    formData.append('Negotiating', counts.Negotiating);
-    formData.append('Inspiring', counts.Inspiring);
-    formData.append('Bridging', counts.Bridging);
+    const dataToSend = {
+      fullName: fullName,
+      Rationalizing: counts.Rationalizing,
+      Asserting: counts.Asserting,
+      Negotiating: counts.Negotiating,
+      Inspiring: counts.Inspiring,
+      Bridging: counts.Bridging
+    };
 
-    try {
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: formData
-      });
-      console.log('Data berhasil dikirim ke Google Sheets.');
-      alert('Data Anda telah berhasil dikirim ke Spreadsheet!');
-    } catch (error) {
-      console.error('Error saat mengirim data:', error);
-      alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
-    } finally {
-      btnSendToSheet.disabled = false;
+    // Fungsi untuk mengirim data menggunakan formulir tersembunyi
+    function sendData(url, data) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+      form.target = '_blank'; // Buka di tab baru agar halaman tidak dimuat ulang
+      form.style.display = 'none';
+
+      for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = data[key];
+          form.appendChild(input);
+        }
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
     }
+
+    sendData(SCRIPT_URL, dataToSend);
+
+    alert('Data Anda telah berhasil dikirim ke Spreadsheet! Silakan periksa tab baru.');
+    btnSendToSheet.disabled = false;
   });
 
   btnReset.addEventListener('click', () => {
