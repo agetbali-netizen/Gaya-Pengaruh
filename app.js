@@ -75,3 +75,48 @@ btnReset.addEventListener('click', () => {
   if (chart) chart.destroy();  // Hapus grafik jika ada
   result.classList.add('hidden');  // Sembunyikan hasil
 });
+function renderChart(counts) {
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  const data = [
+    counts.Rationalizing, counts.Asserting, counts.Negotiating, counts.Inspiring, counts.Bridging
+  ];
+
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Rationalizing', 'Asserting', 'Negotiating', 'Inspiring', 'Bridging'],
+      datasets: [{
+        label: 'Gaya Mempengaruhi',
+        data,
+        fill: true,
+        backgroundColor: 'rgba(0, 123, 255, 0.2)', 
+        borderColor: 'rgba(0, 123, 255, 1)', 
+        pointBackgroundColor: 'rgba(0, 123, 255, 1)', 
+        pointBorderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { 
+        r: { 
+          min: 0, 
+          max: 3, 
+          ticks: { stepSize: 1 },
+          grid: {
+            color: "#ddd" 
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false 
+        }
+      }
+    }
+  });
+
+  setTimeout(() => {
+    downloadLink.href = chart.toBase64Image();
+  }, 300);
+}
