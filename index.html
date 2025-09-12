@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gaya Mempengaruhi – E‑Form</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <!-- Logo di pojok kanan atas -->
+  <img src="https://agetdevelopment.com/wp-content/uploads/2019/03/AGET-horizontal-logo-2.png" alt="AGET Logo" id="logo">
+
+  <main class="container">
+    <h1>Gaya Mempengaruhi</h1>
+    <p class="subtitle">Centang pernyataan yang <b>mencerminkan diri Anda</b>. Klik “Lihat Hasil” untuk menampilkan grafik.</p>
+
+    <form id="formGM">
+      <section class="field-group">
+        <label><input type="checkbox" id="q1"/> 1. Saya menggunakan logika untuk meyakinkan orang lain</label>
+        <label><input type="checkbox" id="q2"/> 2. Saya biasanya menggunakan fakta‑fakta untuk meyakinkan orang lain</label>
+        <label><input type="checkbox" id="q3"/> 3. Saya menggunakan kemampuan dan pengalaman saya untuk membujuk orang lain</label>
+        <label><input type="checkbox" id="q4"/> 4. Saya biasanya tetap teguh pada ide saya agar didengar walaupun orang lain tidak setuju</label>
+        <label><input type="checkbox" id="q5"/> 5. Saya men‑challenge orang lain dengan menanyakan ide lain saat orang lain tidak setuju</label>
+        <label><input type="checkbox" id="q6"/> 6. Saya akan mendebat dan menekan orang lain agar mereka melihat dari sudut pandang saya</label>
+        <label><input type="checkbox" id="q7"/> 7. Saya biasanya berkompromi dan memberikan kelonggaran untuk mendapatkan hasil yang saya inginkan</label>
+        <label><input type="checkbox" id="q8"/> 8. Saya biasanya melakukan pertukaran untuk mendapatkan hasil yang saya inginkan</label>
+        <label><input type="checkbox" id="q9"/> 9. Jika diperlukan, saya akan menunda diskusi sampai waktu yang memungkinkan</label>
+        <label><input type="checkbox" id="q10"/> 10. Saya meyakinkan orang lain dengan menceritakan kemungkinan positif apabila orang lain melakukan ide saya</label>
+        <label><input type="checkbox" id="q11"/> 11. Saya menggunakan pendekatan inspiratif, cerita, dan metafora untuk meyakinkan orang lain</label>
+        <label><input type="checkbox" id="q12"/> 12. Saya menggunakan posisi saya untuk mengomunikasikan misi yang ingin saya capai</label>
+        <label><input type="checkbox" id="q13"/> 13. Saya memengaruhi orang lain dengan menyatukan orang lain atau berhubungan baik dengan orang lain</label>
+        <label><input type="checkbox" id="q14"/> 14. Saya memiliki hubungan timbal balik yang menguntungkan bagi kedua belah pihak untuk meyakinkan orang lain</label>
+        <label><input type="checkbox" id="q15"/> 15. Saya menggunakan kedekatan personal dengan orang lain untuk membuat orang lain setuju dengan pandangan saya</label>
+      </section>
+
+      <div class="actions">
+        <button id="btnSubmit" type="submit">Lihat Hasil</button>
+        <button id="btnReset" type="button" class="secondary">Reset</button>
+      </div>
+    </form>
+
+    <section id="result" class="result hidden">
+      <h2>Hasil Anda</h2>
+      <div class="score-row">
+        <div><span class="pill">Rationalizing</span> <b id="sRationalizing">0</b></div>
+        <div><span class="pill">Asserting</span> <b id="sAsserting">0</b></div>
+        <div><span class="pill">Negotiating</span> <b id="sNegotiating">0</b></div>
+        <div><span class="pill">Inspiring</span> <b id="sInspiring">0</b></div>
+        <div><span class="pill">Bridging</span> <b id="sBridging">0</b></div>
+      </div>
+      <canvas id="radarChart" width="520" height="520" aria-label="Grafik radar gaya mempengaruhi"></canvas>
+      <div class="actions">
+        <a id="downloadPng" class="secondary button-like" download="gaya-mempengaruhi.png">Unduh PNG</a>
+        <a id="exportPdf" class="secondary button-like">Export PDF</a>
+      </div>
+      <p class="note">Skor tiap dimensi adalah jumlah pernyataan yang Anda centang dalam rentang nomor berikut: <br/>
+      <b>Rationalizing</b> (1–3), <b>Asserting</b> (4–6), <b>Negotiating</b> (7–9), <b>Inspiring</b> (10–12), <b>Bridging</b> (13–15).</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
