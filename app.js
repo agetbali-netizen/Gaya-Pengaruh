@@ -13,8 +13,8 @@
   const btnSubmit = document.getElementById('btnSubmit');
   const btnSendToSheet = document.getElementById('btnSendToSheet');
 
-  // URL Web App Google Sheets untuk mengirim email
-  const SCRIPT_URL_EMAIL = 'https://script.google.com/macros/s/AKfycbzbV1atTo6IsVdJRmUIsRT5QnLds8TF-epxV7geR6Slo57c5HQ5z8lof3ZeEKbyr2FL/exec'; // Pastikan Anda menggunakan URL yang benar
+  // Ganti dengan URL Web App Google Apps Script Anda
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbV1atTo6IsVdJRmUIsRT5QnLds8TF-epxV7geR6Slo57c5HQ5z8lof3ZeEKbyr2FL/exec';
 
   let chart;
 
@@ -87,49 +87,33 @@
     result.scrollIntoView({ behavior: 'smooth' });
   });
 
-  btnSendToSheet.addEventListener('click', () => {
+  btnSendToSheet.addEventListener('click', async () => {
     btnSendToSheet.disabled = true;
 
     const counts = countScores();
     const fullName = document.getElementById('fullName').value;
 
-    const dataToSend = {
-      fullName: fullName,
-      Rationalizing: counts.Rationalizing,
-      Asserting: counts.Asserting,
-      Negotiating: counts.Negotiating,
-      Inspiring: counts.Inspiring,
-      Bridging: counts.Bridging
-    };
+    const formData = new FormData();
+    formData.append('fullName', fullName);
+    formData.append('Rationalizing', counts.Rationalizing);
+    formData.append('Asserting', counts.Asserting);
+    formData.append('Negotiating', counts.Negotiating);
+    formData.append('Inspiring', counts.Inspiring);
+    formData.append('Bridging', counts.Bridging);
 
-    // Fungsi untuk mengirim data menggunakan formulir tersembunyi
-    function sendData(url, data) {
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = url;
-      form.target = '_blank'; // Buka di tab baru agar halaman tidak dimuat ulang
-      form.style.display = 'none';
-
-      for (const key in data) {
-        if (data.hasOwnProperty(key)) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = data[key];
-          form.appendChild(input);
-        }
-      }
-
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: formData
+      });
+      console.log('Data berhasil dikirim ke Google Sheets.');
+      alert('Data Anda telah berhasil dikirim ke Spreadsheet!');
+    } catch (error) {
+      console.error('Error saat mengirim data:', error);
+      alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+    } finally {
+      btnSendToSheet.disabled = false;
     }
-
-    // Hanya kirim data sebagai email
-    sendData(SCRIPT_URL_EMAIL, dataToSend);
-
-    alert('Hasil Anda telah berhasil dikirim melalui email!');
-    btnSendToSheet.disabled = false;
   });
 
   btnReset.addEventListener('click', () => {
