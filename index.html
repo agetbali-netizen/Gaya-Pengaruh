@@ -54,6 +54,7 @@
 
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto">
+            <!-- Formulir Informasi Peserta -->
             <div class="bg-white rounded-lg card-shadow p-6 mb-8" id="instructions">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Informasi Peserta</h2>
                 <div class="mb-6">
@@ -76,15 +77,46 @@
                     <p>• Tidak ada jawaban benar atau salah</p>
                     <p>• Jawablah dengan jujur sesuai kondisi sebenarnya</p>
                 </div>
-                <button onclick="startAssessment()" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                <button id="startBtn" onclick="startAssessment()" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                     Mulai Asesmen
                 </button>
             </div>
 
+            <!-- Pertanyaan Asesmen -->
             <div class="bg-white rounded-lg card-shadow p-6 hidden" id="assessment">
-                <!-- Pertanyaan asesmen akan ditampilkan di sini -->
+                <div class="mb-6">
+                    <span class="text-sm font-medium text-blue-600" id="question-number">Pertanyaan 1 dari 20</span>
+                    <h3 class="text-lg font-semibold text-gray-800 mt-2" id="question-text">
+                        Ketika memimpin tim, saya cenderung...
+                    </h3>
+                </div>
+
+                <div class="space-y-3" id="options-container">
+                    <div>
+                        <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors">
+                            <input type="radio" name="answer" value="yes" class="mr-3 text-green-600">
+                            <span class="text-gray-700 font-medium">Ya</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-red-50 transition-colors">
+                            <input type="radio" name="answer" value="no" class="mr-3 text-red-600">
+                            <span class="text-gray-700 font-medium">Tidak</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button onclick="previousQuestion()" id="prev-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50" disabled>
+                        Sebelumnya
+                    </button>
+                    <button onclick="nextQuestion()" id="next-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50" disabled>
+                        Selanjutnya
+                    </button>
+                </div>
             </div>
 
+            <!-- Hasil Asesmen -->
             <div class="bg-white rounded-lg card-shadow p-6 hidden" id="results">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Hasil Asesmen Anda</h2>
                 <p class="text-sm text-center mb-2">Hasil Asesmen untuk: <span id="nama-peserta" class="font-semibold"></span></p>
@@ -100,51 +132,71 @@
     </div>
 
     <script>
-        // Fungsi kirim hasil ke email
-        function sendResultsToEmail() {
+        // Fungsi untuk memulai asesmen
+        function startAssessment() {
             const fullName = document.getElementById('fullName').value.trim();
             const email = document.getElementById('email').value.trim();
+
+            // Validasi input
             if (!fullName || !email) {
-                alert('Nama lengkap dan email diperlukan untuk mengirim hasil.');
+                alert('Silakan masukkan nama lengkap dan email Anda terlebih dahulu.');
                 return;
             }
 
-            const dominantStyle = 'Gaya Direktif'; // Contoh: harus diubah sesuai hasil asesmen
-            const recommendations = ['• Kembangkan kemampuan mendengarkan aktif'];
-            const scores = 'Rationalizing: 5, Asserting: 3'; // Contoh: sesuaikan skor dengan data nyata
+            // Sembunyikan instruksi dan tampilkan halaman asesmen
+            document.getElementById('instructions').classList.add('hidden');
+            document.getElementById('assessment').classList.remove('hidden');
 
-            const form = new FormData();
-            form.append('action', 'sendEmailText');
-            form.append('nama', fullName);
-            form.append('email', email);
-            form.append('dominantStyle', dominantStyle);
-            form.append('recommendations', recommendations.join('\n'));
-            form.append('scores', scores);
+            // Menampilkan pertanyaan pertama
+            showQuestion();
+        }
 
-            const button = document.querySelector('button[onclick="sendResultsToEmail()"]');
-            button.disabled = true;
-            button.textContent = 'Mengirim...';
+        // Fungsi untuk menampilkan pertanyaan
+        function showQuestion() {
+            const question = 'Ketika memimpin tim, saya cenderung...';
+            document.getElementById('question-text').textContent = question;
 
-            fetch('https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec', {
-                method: 'POST',
-                body: form,
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.error) {
-                    alert('Gagal mengirim email: ' + result.error);
-                } else {
-                    alert('Hasil asesmen berhasil dikirim ke email!');
-                }
-            })
-            .catch(error => {
-                alert('Terjadi kesalahan saat mengirim data.');
-                console.error('Fetch Error:', error);
-            })
-            .finally(() => {
-                button.disabled = false;
-                button.textContent = 'Kirim Hasil ke Email';
-            });
+            const container = document.getElementById('options-container');
+            container.innerHTML = `
+                <div>
+                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors">
+                        <input type="radio" name="answer" value="yes" class="mr-3 text-green-600">
+                        <span class="text-gray-700 font-medium">Ya</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-red-50 transition-colors">
+                        <input type="radio" name="answer" value="no" class="mr-3 text-red-600">
+                        <span class="text-gray-700 font-medium">Tidak</span>
+                    </label>
+                </div>
+            `;
+
+            const radios = container.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => radio.addEventListener('change', function() {
+                document.getElementById('next-btn').disabled = false;
+            }));
+
+            updateProgress();
+        }
+
+        // Fungsi untuk melanjutkan ke pertanyaan berikutnya
+        function nextQuestion() {
+            alert("Menampilkan pertanyaan selanjutnya");
+            // Tambahkan logika untuk memindahkan ke pertanyaan berikutnya
+        }
+
+        // Fungsi untuk kembali ke pertanyaan sebelumnya
+        function previousQuestion() {
+            alert("Kembali ke pertanyaan sebelumnya");
+            // Tambahkan logika untuk kembali ke pertanyaan sebelumnya
+        }
+
+        // Fungsi untuk memperbarui progress bar
+        function updateProgress() {
+            const progress = 10; // Misalnya, update berdasarkan jumlah pertanyaan yang telah dijawab
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent = `${progress}/20`;
         }
     </script>
 </body>
