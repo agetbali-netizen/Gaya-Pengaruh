@@ -13,8 +13,10 @@
   const btnSubmit = document.getElementById('btnSubmit');
   const btnSendToSheet = document.getElementById('btnSendToSheet');
 
-  // URL Web App Google Sheets Anda.
+  // URL Web App Google Sheets untuk menyimpan data
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbV1atTo6IsVdJRmUIsRT5QnLds8TF-epxV7geR6Slo57c5HQ5z8lof3ZeEKbyr2FL/exec';
+  // URL Web App Google Sheets untuk mengirim email (Anda harus membuatnya)
+  const SCRIPT_URL_EMAIL = 'GANTI_DENGAN_URL_SCRIPT_EMAIL_ANDA';
 
   let chart;
 
@@ -93,27 +95,29 @@
     const counts = countScores();
     const fullName = document.getElementById('fullName').value;
 
-    const dataToSend = {
-      fullName: fullName,
-      Rationalizing: counts.Rationalizing,
-      Asserting: counts.Asserting,
-      Negotiating: counts.Negotiating,
-      Inspiring: counts.Inspiring,
-      Bridging: counts.Bridging
-    };
+    const formData = new FormData();
+    formData.append('fullName', fullName);
+    formData.append('Rationalizing', counts.Rationalizing);
+    formData.append('Asserting', counts.Asserting);
+    formData.append('Negotiating', counts.Negotiating);
+    formData.append('Inspiring', counts.Inspiring);
+    formData.append('Bridging', counts.Bridging);
 
     try {
-      const response = await fetch(SCRIPT_URL, {
+      // Kirim data ke Google Sheets
+      await fetch(SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors',
-        cache: 'no-cache',
-        redirect: 'follow',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(dataToSend)
+        body: formData
       });
       console.log('Data berhasil dikirim ke Google Sheets.');
+
+      // Kirim data sebagai email
+      await fetch(SCRIPT_URL_EMAIL, {
+        method: 'POST',
+        body: formData
+      });
+      console.log('Email berhasil dikirim.');
+
       alert('Data Anda telah berhasil dikirim!');
     } catch (error) {
       console.error('Error saat mengirim data:', error);
