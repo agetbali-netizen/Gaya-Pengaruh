@@ -56,7 +56,7 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-sm font-medium text-gray-600">Progress</span>
-                <span class="text-sm font-medium text-gray-600" id="progress-text">0/20</span>
+                <span class="text-sm font-medium text-gray-600" id="progress-text">0/15</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
                 <div class="progress-bar bg-blue-600 h-2 rounded-full" id="progress-bar" style="width: 0%"></div>
@@ -71,14 +71,14 @@
                 <div class="mb-6">
                     <label for="fullName" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
                     <input type="text" id="fullName" name="fullName"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                                placeholder="Masukkan nama lengkap Anda" required>
+                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                 placeholder="Masukkan nama lengkap Anda" required>
                 </div>
                 <div class="mb-6">
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" id="email" name="email"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                                placeholder="Masukkan email Anda" required>
+                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                 placeholder="Masukkan email Anda" required>
                 </div>
                 
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Petunjuk Pengisian</h3>
@@ -95,7 +95,7 @@
 
             <div class="bg-white rounded-lg card-shadow p-6 hidden" id="assessment">
                 <div class="mb-6">
-                    <span class="text-sm font-medium text-blue-600" id="question-number">Pertanyaan 1 dari 20</span>
+                    <span class="text-sm font-medium text-blue-600" id="question-number">Pertanyaan 1 dari 15</span>
                     <h3 class="text-lg font-semibold text-gray-800 mt-2" id="question-text">
                         Ketika memimpin tim, saya cenderung...
                     </h3>
@@ -148,7 +148,7 @@
                                 <text x="30" y="165" text-anchor="middle" class="text-xs font-medium fill-gray-600">Bridging</text>
 
                                 <polygon id="result-polygon" points="160,160 160,160 160,160 160,160 160,160"
-                                         fill="rgba(59, 130, 246, 0.3)" stroke="#3b82f6" stroke-width="2"/>
+                                             fill="rgba(59, 130, 246, 0.3)" stroke="#3b82f6" stroke-width="2"/>
 
                                 <circle id="point-rationalizing" cx="160" cy="160" r="4" fill="#3b82f6"/>
                                 <circle id="point-asserting" cx="160" cy="160" r="4" fill="#ef4444"/>
@@ -208,9 +208,6 @@
                 </div>
 
                 <div class="text-center mt-6 no-print">
-                    <button id="email-button" onclick="sendResultsToEmail()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mr-4">
-                        Kirim Hasil ke Email
-                    </button>
                     <button onclick="downloadResultsAsPDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mr-4">
                         Unduh Hasil PDF
                     </button>
@@ -218,38 +215,27 @@
                         Ulangi Asesmen
                     </button>
                 </div>
-                
-                <!-- Status message untuk feedback pengiriman email -->
-                <div id="email-status" class="mt-4 text-center hidden"></div>
             </div>
         </div>
     </div>
 
     <script>
         const questions = [
-            { text: "Saya selalu menyiapkan data dan fakta sebelum meyakinkan orang lain", type: "rationalizing" },
-            { text: "Saya percaya diri dalam menyampaikan pendapat saya", type: "asserting" },
-            { text: "Saya suka mencari solusi yang menguntungkan semua pihak", type: "negotiating" },
-            { text: "Saya sering menginspirasi orang dengan visi masa depan", type: "inspiring" },
-            { text: "Saya membangun hubungan personal sebelum mempengaruhi", type: "bridging" },
-
-            { text: "Saya menggunakan grafik dan statistik dalam presentasi", type: "rationalizing" },
-            { text: "Saya tidak ragu mengambil keputusan sulit", type: "asserting" },
-            { text: "Saya mempertimbangkan kepentingan berbagai pihak", type: "negotiating" },
-            { text: "Saya suka berbagi cerita yang memotivasi", type: "inspiring" },
-            { text: "Saya mencari kesamaan dengan lawan bicara", type: "bridging" },
-
-            { text: "Saya menyajikan analisis mendalam untuk mendukung argumen", type: "rationalizing" },
-            { text: "Saya tegas dalam menyampaikan ekspektasi", type: "asserting" },
-            { text: "Saya terbuka untuk berkompromi demi kesepakatan", type: "negotiating" },
-            { text: "Saya menghubungkan tugas dengan tujuan yang lebih besar", type: "inspiring" },
-            { text: "Saya membangun trust sebelum meminta sesuatu", type: "bridging" },
-
-            { text: "Saya menggunakan riset dan benchmark dalam proposal", type: "rationalizing" },
-            { text: "Saya menekankan urgensi untuk mendorong tindakan", type: "asserting" },
-            { text: "Saya mencari win-win solution dalam negosiasi", type: "negotiating" },
-            { text: "Saya menggambarkan visi yang menginspirasi perubahan", type: "inspiring" },
-            { text: "Saya melibatkan orang lain dalam proses pengambilan keputusan", type: "bridging" }
+            { text: "1. Saya menggunakan logika untuk meyakinkan orang lain", type: "rationalizing" },
+            { text: "2. Saya biasanya menggunakan fakta-fakta untuk meyakinkan orang lain", type: "rationalizing" },
+            { text: "3. Saya menggunakan kemampuan dan pengalaman saya untuk membujuk orang lain", type: "asserting" },
+            { text: "4. Saya biasanya tetap teguh pada ide saya agar didengar walaupun orang lain tidak setuju", type: "asserting" },
+            { text: "5. Saya men-challenge orang lain dengan menanyakan ide lain saat orang lain tidak setuju", type: "asserting" },
+            { text: "6. Saya akan mendebat dan menekan orang lain agar mereka melihat dari sudut pandang Anda", type: "asserting" },
+            { text: "7. Saya biasanya berkompromi dan memberikan kelonggaran untuk mendapatkan hasil yang saya inginkan", type: "negotiating" },
+            { text: "8. Saya biasanya melakukan pertukaran untuk mendapatkan hasil yang saya inginkan", type: "negotiating" },
+            { text: "9. Jika diperlukan, saya akan menunda diskusi sampai waktu yang memungkinkan", type: "negotiating" },
+            { text: "10. Saya meyakinkan orang lain dengan menceritakan kemungkinan positif apabila orang lain melakukan ide Anda", type: "inspiring" },
+            { text: "11. Saya menggunakan pendekatan inspiratif, cerita dan metafora untuk meyakinkan orang lain", type: "inspiring" },
+            { text: "12. Saya menggunakan posisi saya untuk menkomunikasikan misi yang ingin saya capai", type: "asserting" },
+            { text: "13. Saya mempengaruhi orang lain dengan menyatukan orang lain atau berhubungan baik dengan orang lain", type: "bridging" },
+            { text: "14. Saya memiliki hubungan timbal balik yang menguntungkan bagi kedua belah pihak untuk meyakinkan orang lain", type: "bridging" },
+            { text: "15. Saya menggunakan kedekatan personal dengan orang lain untuk membuat orang lain setuju dengan pandangan saya", type: "bridging" }
         ];
 
         let currentQuestion = 0;
@@ -372,7 +358,7 @@
             const fullName = document.getElementById('fullName').value.trim();
             document.getElementById('nama-peserta').textContent = fullName;
             
-            const maxScore = 4;
+            const maxScore = 4; // Total pernyataan untuk masing-masing gaya
             const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
             const result = styles[dominantStyle];
 
@@ -413,100 +399,6 @@
             recList.innerHTML = result.recommendations.map(rec => `<li>${rec}</li>`).join('');
         }
 
-        function sendResultsToEmail() {
-            const fullName = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            if (!fullName || !email) {
-                alert('Nama lengkap dan email diperlukan untuk mengirim hasil.');
-                return;
-            }
-            
-            // Validasi format email
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                alert('Format email tidak valid. Silakan periksa kembali.');
-                return;
-            }
-            
-            const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
-            const result = styles[dominantStyle];
-            const timestamp = new Date().toLocaleString('id-ID', {
-                weekday: 'short', 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            // Format data dengan benar untuk dikirim ke Google Apps Script
-            const data = {
-                action: 'sendEmailText',
-                nama: fullName,
-                email: email,
-                from: 'agetbali@gmail.com', // Menambahkan pengirim
-                subject: 'Hasil Asesmen Gaya Mempengaruhi - ' + fullName,
-                dominantStyle: result.title,
-                description: result.description,
-                recommendations: result.recommendations.join('\n'),
-                scores: JSON.stringify({
-                    rationalizing: answers.rationalizing,
-                    asserting: answers.asserting,
-                    negotiating: answers.negotiating,
-                    inspiring: answers.inspiring,
-                    bridging: answers.bridging
-                }),
-                timestamp: timestamp
-            };
-            
-            const button = document.getElementById('email-button');
-            const statusElement = document.getElementById('email-status');
-            
-            button.disabled = true;
-            button.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
-            statusElement.classList.add('hidden');
-            
-            // Menggunakan pendekatan fetch dengan error handling yang lebih baik
-            fetch('https://script.google.com/macros/s/AKfycbzgWQW3eLghUWfLcxdaSB20yNXWbtcU8a-uAtGwE7-wP230lvLqW_pTvNDgMcIma2eL1w/exec', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(result => {
-                if (result.error) {
-                    throw new Error(result.error);
-                }
-                
-                // Berhasil
-                statusElement.textContent = '✅ Hasil asesmen berhasil dikirim ke email!';
-                statusElement.classList.remove('hidden', 'text-red-600');
-                statusElement.classList.add('text-green-600');
-                
-                alert('Hasil asesmen berhasil dikirim ke email!');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                statusElement.textContent = '❌ Gagal mengirim email: ' + error.message;
-                statusElement.classList.remove('hidden', 'text-green-600');
-                statusElement.classList.add('text-red-600');
-                
-                alert('Gagal mengirim email: ' + error.message);
-            })
-            .finally(() => {
-                // Reset button
-                button.disabled = false;
-                button.textContent = 'Kirim Hasil ke Email';
-            });
-        }
-
         function downloadResultsAsPDF() {
             const resultsElement = document.getElementById('results');
             const fullName = document.getElementById('fullName').value.trim();
@@ -528,8 +420,7 @@
             document.getElementById('results').classList.add('hidden');
             document.getElementById('instructions').classList.remove('hidden');
             document.getElementById('progress-bar').style.width = '0%';
-            document.getElementById('progress-text').textContent = '0/20';
-            document.getElementById('email-status').classList.add('hidden');
+            document.getElementById('progress-text').textContent = '0/15';
         }
     </script>
 </body>
