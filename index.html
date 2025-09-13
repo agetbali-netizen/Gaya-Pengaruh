@@ -1,405 +1,7 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asesmen Gaya Mempengaruhi</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .card-shadow {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        .progress-bar {
-            transition: width 0.3s ease;
-        }
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-            }
-            .no-print {
-                display: none;
-            }
-        }
-        .loading-spinner {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="gradient-bg text-white py-8 relative no-print">
-        <div class="container mx-auto px-4">
-            <div class="absolute top-4 right-4">
-                <img src="https://agetdevelopment.com/wp-content/uploads/2019/03/AGET-horizontal-logo-2.png" alt="AGET Development Logo" class="h-16">
-            </div>
-            <h1 class="text-3xl font-bold text-center mb-2">Asesmen Gaya Mempengaruhi</h1>
-            <p class="text-center text-blue-100">Temukan gaya kepemimpinan dan pengaruh Anda</p>
-        </div>
-    </div>
-
-    <div class="bg-white shadow-sm no-print">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-sm font-medium text-gray-600">Progress</span>
-                <span class="text-sm font-medium text-gray-600" id="progress-text">0/15</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="progress-bar bg-blue-600 h-2 rounded-full" id="progress-bar" style="width: 0%"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
-            <div class="bg-white rounded-lg card-shadow p-6 mb-8" id="instructions">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Informasi Peserta</h2>
-                <div class="mb-6">
-                    <label for="fullName" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                    <input type="text" id="fullName" name="fullName"
-                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                                 placeholder="Masukkan nama lengkap Anda" required>
-                </div>
-                <div class="mb-6">
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input type="email" id="email" name="email"
-                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                                 placeholder="Masukkan email Anda" required>
-                </div>
-                
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Petunjuk Pengisian</h3>
-                <div class="space-y-3 text-gray-600">
-                    <p>• Bacalah setiap pernyataan dengan cermat</p>
-                    <p>• Pilih jawaban yang paling menggambarkan diri Anda</p>
-                    <p>• Tidak ada jawaban benar atau salah</p>
-                    <p>• Jawablah dengan jujur sesuai kondisi sebenarnya</p>
-                </div>
-                <button onclick="startAssessment()" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-                    Mulai Asesmen
-                </button>
-            </div>
-
-            <div class="bg-white rounded-lg card-shadow p-6 hidden" id="assessment">
-                <div class="mb-6">
-                    <span class="text-sm font-medium text-blue-600" id="question-number">Pertanyaan 1 dari 15</span>
-                    <h3 class="text-lg font-semibold text-gray-800 mt-2" id="question-text">
-                        Ketika memimpin tim, saya cenderung...
-                    </h3>
-                </div>
-
-                <div class="space-y-3" id="options-container">
-                </div>
-
-                <div class="flex justify-between mt-8">
-                    <button onclick="previousQuestion()" id="prev-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50" disabled>
-                        Sebelumnya
-                    </button>
-                    <button onclick="nextQuestion()" id="next-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50" disabled>
-                        Selanjutnya
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-lg card-shadow p-6 hidden" id="results">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Hasil Asesmen Anda</h2>
-                <p class="text-sm text-center mb-2">Hasil Asesmen untuk: <span id="nama-peserta" class="font-semibold"></span></p>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="text-center">
-                        <div class="w-32 h-32 mx-auto mb-4 rounded-full flex items-center justify-center text-4xl" id="result-icon">
-                            🎯
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2" id="result-title">Gaya Direktif</h3>
-                        <p class="text-gray-600" id="result-description">
-                            Anda memiliki gaya kepemimpinan yang tegas dan berorientasi pada hasil.
-                        </p>
-                    </div>
-
-                    <div class="text-center">
-                        <div class="relative w-80 h-80 mx-auto mb-6">
-                            <svg width="320" height="320" viewBox="0 0 320 320" class="mx-auto">
-                                <circle cx="160" cy="160" r="40" fill="none" stroke="#e5e7eb" stroke-width="1"/>
-                                <circle cx="160" cy="160" r="80" fill="none" stroke="#e5e7eb" stroke-width="1"/>
-                                <circle cx="160" cy="160" r="120" fill="none" stroke="#e5e7eb" stroke-width="1"/>
-
-                                <line x1="160" y1="40" x2="160" y2="280" stroke="#e5e7eb" stroke-width="1"/>
-                                <line x1="40" y1="160" x2="280" y2="160" stroke="#e5e7eb" stroke-width="1"/>
-                                <line x1="75" y1="75" x2="245" y2="245" stroke="#e5e7eb" stroke-width="1"/>
-                                <line x1="245" y1="75" x2="75" y2="245" stroke="#e5e7eb" stroke-width="1"/>
-
-                                <text x="160" y="30" text-anchor="middle" class="text-xs font-medium fill-gray-600">Rationalizing</text>
-                                <text x="290" y="165" text-anchor="middle" class="text-xs font-medium fill-gray-600">Asserting</text>
-                                <text x="250" y="290" text-anchor="middle" class="text-xs font-medium fill-gray-600">Negotiating</text>
-                                <text x="70" y="290" text-anchor="middle" class="text-xs font-medium fill-gray-600">Inspiring</text>
-                                <text x="30" y="165" text-anchor="middle" class="text-xs font-medium fill-gray-600">Bridging</text>
-
-                                <polygon id="result-polygon" points="160,160 160,160 160,160 160,160 160,160"
-                                             fill="rgba(59, 130, 246, 0.3)" stroke="#3b82f6" stroke-width="2"/>
-
-                                <circle id="point-rationalizing" cx="160" cy="160" r="4" fill="#3b82f6"/>
-                                <circle id="point-asserting" cx="160" cy="160" r="4" fill="#ef4444"/>
-                                <circle id="point-negotiating" cx="160" cy="160" r="4" fill="#10b981"/>
-                                <circle id="point-inspiring" cx="160" cy="160" r="4" fill="#8b5cf6"/>
-                                <circle id="point-bridging" cx="160" cy="160" r="4" fill="#f59e0b"/>
-                            </svg>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 text-sm">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                                    <span>Rationalizing</span>
-                                </div>
-                                <span id="rationalizing-score" class="font-medium">0</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                                    <span>Asserting</span>
-                                </div>
-                                <span id="asserting-score" class="font-medium">0</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                                    <span>Negotiating</span>
-                                </div>
-                                <span id="negotiating-score" class="font-medium">0</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
-                                    <span>Inspiring</span>
-                                </div>
-                                <span id="inspiring-score" class="font-medium">0</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-                                    <span>Bridging</span>
-                                </div>
-                                <span id="bridging-score" class="font-medium">0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-8 p-4 bg-blue-50 rounded-lg">
-                        <h4 class="font-semibold text-gray-800 mb-2">Rekomendasi Pengembangan:</h4>
-                        <ul class="text-gray-600 space-y-1" id="recommendations">
-                            <li>• Kembangkan kemampuan mendengarkan aktif</li>
-                            <li>• Berikan lebih banyak ruang untuk partisipasi tim</li>
-                            <li>• Latih kemampuan delegasi yang efektif</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="text-center mt-6 no-print">
-                    <button id="email-button" onclick="sendResultsToEmail()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mr-4">
-                        Kirim Hasil ke Email
-                    </button>
-                    <button onclick="restartAssessment()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">
-                        Ulangi Asesmen
-                    </button>
-                </div>
-                
-                <div id="email-status" class="mt-4 text-center hidden"></div>
-            </div>
-        </div>
-    </div>
+// ... kode HTML dan JavaScript sebelumnya ...
 
     <script>
-        const questions = [
-            { text: "1. Saya menggunakan logika untuk meyakinkan orang lain", type: "rationalizing" },
-            { text: "2. Saya biasanya menggunakan fakta-fakta untuk meyakinkan orang lain", type: "rationalizing" },
-            { text: "3. Saya menggunakan kemampuan dan pengalaman saya untuk membujuk orang lain", type: "asserting" },
-            { text: "4. Saya biasanya tetap teguh pada ide saya agar didengar walaupun orang lain tidak setuju", type: "asserting" },
-            { text: "5. Saya men-challenge orang lain dengan menanyakan ide lain saat orang lain tidak setuju", type: "asserting" },
-            { text: "6. Saya akan mendebat dan menekan orang lain agar mereka melihat dari sudut pandang Anda", type: "asserting" },
-            { text: "7. Saya biasanya berkompromi dan memberikan kelonggaran untuk mendapatkan hasil yang saya inginkan", type: "negotiating" },
-            { text: "8. Saya biasanya melakukan pertukaran untuk mendapatkan hasil yang saya inginkan", type: "negotiating" },
-            { text: "9. Jika diperlukan, saya akan menunda diskusi sampai waktu yang memungkinkan", type: "negotiating" },
-            { text: "10. Saya meyakinkan orang lain dengan menceritakan kemungkinan positif apabila orang lain melakukan ide Anda", type: "inspiring" },
-            { text: "11. Saya menggunakan pendekatan inspiratif, cerita dan metafora untuk meyakinkan orang lain", type: "inspiring" },
-            { text: "12. Saya menggunakan posisi saya untuk menkomunikasikan misi yang ingin saya capai", type: "asserting" },
-            { text: "13. Saya mempengaruhi orang lain dengan menyatukan orang lain atau berhubungan baik dengan orang lain", type: "bridging" },
-            { text: "14. Saya memiliki hubungan timbal balik yang menguntungkan bagi kedua belah pihak untuk meyakinkan orang lain", type: "bridging" },
-            { text: "15. Saya menggunakan kedekatan personal dengan orang lain untuk membuat orang lain setuju dengan pandangan saya", type: "bridging" }
-        ];
-
-        let currentQuestion = 0;
-        let answers = { rationalizing: 0, asserting: 0, negotiating: 0, inspiring: 0, bridging: 0 };
-        let selectedAnswer = null;
-        
-        const styles = {
-            rationalizing: {
-                title: "Rationalizing (Rasionalisasi)",
-                icon: "📊",
-                description: "Anda cenderung mempengaruhi orang lain dengan menggunakan data, fakta dan argumen logis. Anda percaya pada kekuatan analisis dan bukti empiris untuk meyakinkan orang lain.",
-                recommendations: ["• Kembangkan kemampuan storytelling untuk melengkapi data", "• Latih empati untuk memahami perspektif emosional", "• Pelajari cara menyederhanakan informasi kompleks"]
-            },
-            asserting: {
-                title: "Asserting (Asertif)",
-                icon: "💪",
-                description: "Anda mempengaruhi dengan menunjukkan kepercayaan diri dan ketegasan. Anda tidak ragu menyatakan posisi dan menggunakan otoritas untuk mencapai tujuan.",
-                recommendations: ["• Kembangkan kemampuan mendengarkan aktif", "• Latih fleksibilitas dalam pendekatan", "• Pelajari cara membangun konsensus, bukan hanya compliance"]
-            },
-            negotiating: {
-                title: "Negotiating (Negosiasi)",
-                icon: "🤝",
-                description: "Anda mahir dalam mencari win-win solution dan membangun kesepakatan yang menguntungkan semua pihak. Anda fokus pada pertukaran nilai dan kompromi yang adil.",
-                recommendations: ["• Kembangkan kemampuan inspirasi untuk visi jangka panjang", "• Latih ketegasan saat diperlukan keputusan cepat", "• Pelajari cara membangun trust yang lebih mendalam"]
-            },
-            inspiring: {
-                title: "Inspiring (Inspirasi)",
-                icon: "✨",
-                description: "Anda mempengaruhi dengan menciptakan visi yang menarik dan menghubungkan tujuan dengan nilai-nilai yang lebih besar. Anda mampu memotivasi melalui purpose dan meaning.",
-                recommendations: ["• Kembangkan kemampuan analisis untuk mendukung visi", "• Latih keterampilan eksekusi yang praktis", "• Pelajari cara mengukur dan melacak progress inspirasi"]
-            },
-            bridging: {
-                title: "Bridging (Membangun Jembatan)",
-                icon: "🌉",
-                description: "Anda mempengaruhi dengan membangun hubungan personal yang kuat dan mencari kesamaan. Anda fokus pada koneksi emosional dan trust sebagai fondasi pengaruh.",
-                recommendations: ["• Kembangkan kemampuan mengambil keputusan sulit", "• Latih keterampilan presentasi yang lebih impactful", "• Pelajari cara menggunakan data untuk memperkuat hubungan"]
-            }
-        };
-
-        function startAssessment() {
-            const fullName = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            if (!fullName || !email) {
-                alert('Silakan masukkan nama lengkap dan email Anda terlebih dahulu.');
-                return;
-            }
-            document.getElementById('instructions').classList.add('hidden');
-            document.getElementById('assessment').classList.remove('hidden');
-            showQuestion();
-        }
-
-        function showQuestion() {
-            const question = questions[currentQuestion];
-            document.getElementById('question-number').textContent = `Pertanyaan ${currentQuestion + 1} dari ${questions.length}`;
-            document.getElementById('question-text').textContent = question.text;
-
-            const container = document.getElementById('options-container');
-            container.innerHTML = `
-                <div>
-                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors">
-                        <input type="radio" name="answer" value="yes" class="mr-3 text-green-600">
-                        <span class="text-gray-700 font-medium">Ya</span>
-                    </label>
-                </div>
-                <div>
-                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-red-50 transition-colors">
-                        <input type="radio" name="answer" value="no" class="mr-3 text-red-600">
-                        <span class="text-gray-700 font-medium">Tidak</span>
-                    </label>
-                </div>
-            `;
-            const radios = container.querySelectorAll('input[type="radio"]');
-            radios.forEach(radio => radio.addEventListener('change', function() {
-                selectedAnswer = this.value;
-                document.getElementById('next-btn').disabled = false;
-            }));
-
-            updateProgress();
-            updateButtons();
-        }
-
-        function nextQuestion() {
-            if (selectedAnswer) {
-                if (selectedAnswer === 'yes') {
-                    answers[questions[currentQuestion].type]++;
-                }
-                selectedAnswer = null;
-                
-                if (currentQuestion < questions.length - 1) {
-                    currentQuestion++;
-                    showQuestion();
-                } else {
-                    showResults();
-                }
-            }
-        }
-
-        function previousQuestion() {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                showQuestion();
-            }
-        }
-
-        function updateProgress() {
-            const progress = ((currentQuestion + 1) / questions.length) * 100;
-            document.getElementById('progress-bar').style.width = progress + '%';
-            document.getElementById('progress-text').textContent = `${currentQuestion + 1}/${questions.length}`;
-        }
-
-        function updateButtons() {
-            document.getElementById('prev-btn').disabled = currentQuestion === 0;
-            document.getElementById('next-btn').disabled = !selectedAnswer;
-        }
-
-        function showResults() {
-            document.getElementById('assessment').classList.add('hidden');
-            document.getElementById('results').classList.remove('hidden');
-
-            const fullName = document.getElementById('fullName').value.trim();
-            document.getElementById('nama-peserta').textContent = fullName;
-            
-            const maxScore = 4;
-            const dominantStyle = Object.keys(answers).reduce((a, b) => answers[a] > answers[b] ? a : b);
-            const result = styles[dominantStyle];
-
-            document.getElementById('result-icon').textContent = result.icon;
-            document.getElementById('result-title').textContent = result.title;
-            document.getElementById('result-description').textContent = result.description;
-
-            document.getElementById('rationalizing-score').textContent = answers.rationalizing;
-            document.getElementById('asserting-score').textContent = answers.asserting;
-            document.getElementById('negotiating-score').textContent = answers.negotiating;
-            document.getElementById('inspiring-score').textContent = answers.inspiring;
-            document.getElementById('bridging-score').textContent = answers.bridging;
-
-            const center = 160;
-            const maxRadius = 120;
-            const points = [
-                [center, center - (answers.rationalizing / maxScore) * maxRadius],
-                [center + (answers.asserting / maxScore) * maxRadius * 0.95, center - (answers.asserting / maxScore) * maxRadius * 0.31],
-                [center + (answers.negotiating / maxScore) * maxRadius * 0.59, center + (answers.negotiating / maxScore) * maxRadius * 0.81],
-                [center - (answers.inspiring / maxScore) * maxRadius * 0.59, center + (answers.inspiring / maxScore) * maxRadius * 0.81],
-                [center - (answers.bridging / maxScore) * maxRadius, center]
-            ];
-            const polygonPoints = points.map(p => `${p[0]},${p[1]}`).join(' ');
-            document.getElementById('result-polygon').setAttribute('points', polygonPoints);
-
-            document.getElementById('point-rationalizing').setAttribute('cx', points[0][0]);
-            document.getElementById('point-rationalizing').setAttribute('cy', points[0][1]);
-            document.getElementById('point-asserting').setAttribute('cx', points[1][0]);
-            document.getElementById('point-asserting').setAttribute('cy', points[1][1]);
-            document.getElementById('point-negotiating').setAttribute('cx', points[2][0]);
-            document.getElementById('point-negotiating').setAttribute('cy', points[2][1]);
-            document.getElementById('point-inspiring').setAttribute('cx', points[3][0]);
-            document.getElementById('point-inspiring').setAttribute('cy', points[3][1]);
-            document.getElementById('point-bridging').setAttribute('cx', points[4][0]);
-            document.getElementById('point-bridging').setAttribute('cy', points[4][1]);
-
-            const recList = document.getElementById('recommendations');
-            recList.innerHTML = result.recommendations.map(rec => `<li>${rec}</li>`).join('');
-        }
+        // ... (bagian kode lainnya tetap sama) ...
 
         function sendResultsToEmail() {
             const fullName = document.getElementById('fullName').value.trim();
@@ -409,7 +11,6 @@
                 return;
             }
             
-            // Validasi format email
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailPattern.test(email)) {
                 alert('Format email tidak valid. Silakan periksa kembali.');
@@ -427,12 +28,11 @@
                 minute: '2-digit'
             });
 
-            // Format data untuk dikirim ke Google Apps Script
             const data = {
                 action: 'sendEmailText',
                 nama: fullName,
                 email: email,
-                from: 'agetbali@gmail.com', // Menambahkan pengirim
+                from: 'agetbali@gmail.com',
                 subject: 'Hasil Asesmen Gaya Mempengaruhi - ' + fullName,
                 dominantStyle: result.title,
                 description: result.description,
@@ -454,7 +54,10 @@
             button.innerHTML = '<span class="loading-spinner"></span> Mengirim...';
             statusElement.classList.add('hidden');
             
-            fetch('https://script.google.com/macros/s/AKfycbxMihbfm34rKxmhDzBXktxgVs5QqtQ7ZcSDtAxlY7zS/dev', {
+            // Perbaikan URL Apps Script di sini
+            const appsScriptURL = 'https://script.google.com/macros/s/AKfycbxMihbfm34rKxmhDzBXktxgVs5QqtQ7ZcSDtAxlY7zS/exec'; // Ganti /dev menjadi /exec
+            
+            fetch(appsScriptURL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -492,15 +95,7 @@
             });
         }
 
-        function restartAssessment() {
-            currentQuestion = 0;
-            answers = { rationalizing: 0, asserting: 0, negotiating: 0, inspiring: 0, bridging: 0 };
-            selectedAnswer = null;
-            document.getElementById('results').classList.add('hidden');
-            document.getElementById('instructions').classList.remove('hidden');
-            document.getElementById('progress-bar').style.width = '0%';
-            document.getElementById('progress-text').textContent = '0/15';
-        }
+        // ... (bagian kode lainnya tetap sama) ...
     </script>
 </body>
 </html>
