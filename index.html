@@ -403,14 +403,25 @@
             const resultsElement = document.getElementById('results');
             const fullName = document.getElementById('fullName').value.trim();
             const fileName = `Hasil_Asesmen_Gaya_Mempengaruhi_${fullName.replace(/ /g, '_')}.pdf`;
+
+            // Opsi konfigurasi untuk html2pdf
             const options = {
-                margin: 10,
+                margin: [10, 10, 10, 10], // Menambah margin agar tidak terlalu mepet
                 filename: fileName,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas: { 
+                    scale: 2, // Meningkatkan resolusi gambar untuk kualitas yang lebih baik
+                    useCORS: true // Memastikan gambar dari luar (seperti logo) dimuat dengan benar
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
             };
-            html2pdf().from(resultsElement).set(options).save();
+
+            // Menggunakan html2pdf untuk mengonversi elemen 'results'
+            html2pdf().set(options).from(resultsElement).save();
         }
 
         function restartAssessment() {
